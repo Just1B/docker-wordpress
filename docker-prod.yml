@@ -1,0 +1,47 @@
+version: '3.1'
+services:
+  db:
+    restart: always
+    image: mariadb:latest
+    ports:
+       - "3306:3306"
+    volumes:
+       - ./db_data:/var/lib/mysql
+    environment:
+       MYSQL_ROOT_PASSWORD : ${MYSQL_ROOT_PASSWORD_PROD}
+
+  wordpress:
+    restart: always
+    image: wordpress:latest
+    expose:
+      - "9000"
+    ports:
+      - 8080:80
+    volumes:
+      - ./wp-content/themes:/var/www/html/wp-content/themes
+      - ./wp-content/uploads:/var/www/html/wp-content/uploads
+      - ./wp-content/plugins:/var/www/html/wp-content/plugins
+      - ./log/apache:/var/log/
+    environment:
+      WORDPRESS_TABLE_PREFIX : ${WORDPRESS_TABLE_PREFIX}
+      WORDPRESS_DB_NAME : ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_PASSWORD : ${MYSQL_ROOT_PASSWORD_PROD}
+      WORDPRESS_DB_HOST : db:3306
+    depends_on:
+      - db
+
+  caddy:
+    restart: always
+    build: ./caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy_data:/root/.caddy
+      - ./Caddyfile:/etc/Caddyfile
+      - ./log/caddy:/var/log/caddy
+    depends_on:
+      - wordpress
+
+volumes:
+  db_data:

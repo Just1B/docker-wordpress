@@ -1,0 +1,25 @@
+YOUR_URL, www.YOUR_URL {
+    redir 301 {
+        / https://{hostonly}{uri}
+    }
+}
+
+YOUR_URL:443, www.YOUR_URL:443 {
+    header / {
+        Strict-Transport-Security "max-age=31536000;"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        -Server
+    }
+
+    proxy / wordpress {
+        transparent
+    }
+
+    gzip
+    tls hello@justi1B.com
+
+    log /var/log/caddy/access.log
+    errors /var/log/caddy/error.log
+}

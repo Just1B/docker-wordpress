@@ -1,0 +1,41 @@
+version: '3.1'
+services:
+  
+  db:
+    # restart: always
+    image: mariadb:latest
+    ports:
+       - "3306:3306"
+    volumes:
+       - "./db_data:/var/lib/mysql"
+    environment:
+       MYSQL_ROOT_PASSWORD : ${MYSQL_ROOT_PASSWORD_DEV}
+
+  wordpress:
+    # restart: always
+    image: wordpress:latest
+    ports:
+      - 8080:80
+    expose:
+      - "9000"
+    volumes:
+      - ./wp-content/themes:/var/www/html/wp-content/themes
+      - ./wp-content/uploads:/var/www/html/wp-content/uploads
+      - ./wp-content/plugins:/var/www/html/wp-content/plugins
+      - ./log/apache:/var/log/
+    environment:
+      WORDPRESS_TABLE_PREFIX : ${WORDPRESS_TABLE_PREFIX}
+      WORDPRESS_DB_NAME : ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_PASSWORD : ${MYSQL_ROOT_PASSWORD_DEV}
+      WORDPRESS_DB_HOST : db:3306
+      WORDPRESS_DEBUG : 1
+    depends_on:
+      - db
+  
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - 10000:8080
+
+volumes:
+  db_data:
